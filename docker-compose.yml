@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+
+  db:
+    image: postgis/postgis:15-3.3
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=strava
+    volumes:
+      - $HOME/docker/volumes/postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  service:
+    build: ./
+    environment:
+      - PROJECT_NAME=strava
+      - POSTGRES_SERVER=db:5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=strava
+    ports:
+      - 8080:8080
+    # depends_on:
+    #   - migration
+
+  # migration:
+  #   build: ./
+  #   command: [bash, -c, "diesel setup && diesel migration run"]
+  #   volumes:
+  #     - ./:/root/app
+  #   working_dir: /root/app
+  #   environment:
+  #     - DATABASE_URL=postgres://postgres:password@db:5432/athena
+  #   links:
+  #     - db
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+
