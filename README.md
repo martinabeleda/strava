@@ -35,7 +35,7 @@ curl -X 'POST' \
 
 Now we can list the routes we've created:
 
-```shelll
+```shell
 curl -X 'GET' \
   'http://0.0.0.0:8080/strava/v1/routes/' \
   -H 'accept: application/json' | jq
