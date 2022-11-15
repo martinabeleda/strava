@@ -306,7 +306,7 @@ test_extra = ["pytest (<7.1)", "pytest-asyncio", "testpath", "curio", "matplotli
 name = "isort"
 version = "5.10.1"
 description = "A Python utility / library to sort Python imports."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.1,<4.0"
 
@@ -759,7 +759,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "e61ab82883d255d2f3c07163b0f08812424e286f53e1d3aa8c1b874330eed598"
+content-hash = "bd59833007ede3aac5bf1a9a24818c90acdc92548126cfe197f4541d8beb24e1"
 
 [metadata.files]
 alembic = []

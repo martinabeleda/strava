@@ -1,8 +1,8 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel
 from geojson_pydantic import LineString
+from pydantic import BaseModel
 
 
 class Activity(str, Enum):

@@ -2,18 +2,16 @@ from typing import List
 
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
-from shapely.geometry import shape, mapping
-
-from geojson_pydantic import LineString
 from geoalchemy2.shape import to_shape
+from geojson_pydantic import LineString
+from shapely.geometry import mapping, shape
+from sqlalchemy.orm import Session
 
 from strava import schemas
-from strava.models.route import Route
-from strava.config import settings
 from strava.db.depends import get_db
+from strava.models.route import Route
 
-router = APIRouter(prefix=settings.API_V1_STR)
+router = APIRouter(prefix="/routes")
 
 
 @router.get("/", response_model=List[schemas.Route])

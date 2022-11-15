@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, Enum
 from geoalchemy2 import Geometry
+from sqlalchemy import Column, Enum, Integer, String
 
 from strava.db.base_class import Base
 from strava.schemas.routes import Activity
