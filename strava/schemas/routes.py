@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel
 from geojson_pydantic import LineString
 
 
@@ -25,7 +25,7 @@ class RouteCreate(RouteBase):
 
 
 class RouteInDB(RouteCreate):
-    id: UUID4
+    id: int
 
     class Config:
         orm_mode = True

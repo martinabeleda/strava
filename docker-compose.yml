@@ -36,6 +36,14 @@ services:
 
   service:
     build: ./
+    command:
+      - uvicorn
+      - "strava.main:app"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8080"
+      - "--reload"
     environment:
       - PROJECT_NAME=strava
       - POSTGRES_SERVER=db:5432
