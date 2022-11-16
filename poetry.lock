@@ -113,6 +113,14 @@ jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
+name = "certifi"
+version = "2022.9.24"
+description = "Python package for providing Mozilla's CA Bundle."
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "click"
 version = "8.1.3"
 description = "Composable command line interface toolkit"
@@ -245,11 +253,49 @@ test = ["objgraph", "psutil", "faulthandler"]
 
 [[package]]
 name = "h11"
-version = "0.14.0"
+version = "0.12.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
 category = "main"
 optional = false
+python-versions = ">=3.6"
+
+[[package]]
+name = "httpcore"
+version = "0.15.0"
+description = "A minimal low-level HTTP client."
+category = "dev"
+optional = false
 python-versions = ">=3.7"
+
+[package.dependencies]
+anyio = ">=3.0.0,<4.0.0"
+certifi = "*"
+h11 = ">=0.11,<0.13"
+sniffio = ">=1.0.0,<2.0.0"
+
+[package.extras]
+http2 = ["h2 (>=3,<5)"]
+socks = ["socksio (>=1.0.0,<2.0.0)"]
+
+[[package]]
+name = "httpx"
+version = "0.23.0"
+description = "The next generation HTTP client."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+certifi = "*"
+httpcore = ">=0.15.0,<0.16.0"
+rfc3986 = {version = ">=1.3,<2", extras = ["idna2008"]}
+sniffio = "*"
+
+[package.extras]
+brotli = ["brotlicffi", "brotli"]
+cli = ["click (>=8.0.0,<9.0.0)", "rich (>=10,<13)", "pygments (>=2.0.0,<3.0.0)"]
+http2 = ["h2 (>=3,<5)"]
+socks = ["socksio (>=1.0.0,<2.0.0)"]
 
 [[package]]
 name = "idna"
@@ -598,6 +644,20 @@ pytest = ">=4.6"
 testing = ["fields", "hunter", "process-tests", "six", "pytest-xdist", "virtualenv"]
 
 [[package]]
+name = "rfc3986"
+version = "1.5.0"
+description = "Validating URI References per RFC 3986"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+idna = {version = "*", optional = true, markers = "extra == \"idna2008\""}
+
+[package.extras]
+idna2008 = ["idna"]
+
+[[package]]
 name = "shapely"
 version = "1.8.5.post1"
 description = "Geometric objects, predicates, and operations"
@@ -759,7 +819,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "bd59833007ede3aac5bf1a9a24818c90acdc92548126cfe197f4541d8beb24e1"
+content-hash = "58345df4abfaba00ad3305c5be8f8c6a435dbae8e70478b93ad534684a08f8e3"
 
 [metadata.files]
 alembic = []
@@ -776,6 +836,7 @@ backcall = [
     {file = "backcall-0.2.0.tar.gz", hash = "sha256:5cbdbf27be5e7cfadb448baf0aa95508f91f2bbc6c6437cd9cd06e2a4c215e1e"},
 ]
 black = []
+certifi = []
 click = []
 colorama = []
 coverage = []
@@ -791,6 +852,8 @@ geoalchemy2 = []
 geojson-pydantic = []
 greenlet = []
 h11 = []
+httpcore = []
+httpx = []
 idna = []
 iniconfig = []
 ipython = []
@@ -890,6 +953,7 @@ pyparsing = [
 ]
 pytest = []
 pytest-cov = []
+rfc3986 = []
 shapely = []
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
