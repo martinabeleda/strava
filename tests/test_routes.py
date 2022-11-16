@@ -8,5 +8,5 @@ def client() -> TestClient:
     return TestClient()
 
 
-def dummy_test():
+def test_summy():
     pass
