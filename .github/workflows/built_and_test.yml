@@ -15,23 +15,9 @@ jobs:
           pip install poetry
           poetry install --no-interaction
       - name: Check formatting
-        run: poetry run black --line-length 120 --check .
-      - name: Code Quality
-        run: poetry run pylint --rcfile .pylintrc app tests
+        run: poetry run black --line-length 120 --check 
       - name: Run tests and generate coverage report
         run: poetry run pytest -s --junitxml=./test-report.xml --cov=./ --cov-report=xml .
-      - uses: actions/upload-artifact@v1
-        with:
-          name: test-report
-          path: ./test-report.xml
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
 
   build:
     runs-on: ubuntu-latest
