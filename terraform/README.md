@@ -31,7 +31,6 @@ Connect to the DB:
 psql -h $(terraform output -raw rds_hostname) -p $(terraform output -raw rds_port) -U $(terraform output -raw rds_username) postgres
 ```
 
-
 ## Deployment
 
 At the moment, infrastructure is deployed manually through the terraform CLI.
