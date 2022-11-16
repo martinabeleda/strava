@@ -15,7 +15,7 @@ jobs:
           pip install poetry
           poetry install --no-interaction
       - name: Check formatting
-        run: poetry run black --line-length 120 --check 
+        run: poetry run black --check .
       - name: Run tests and generate coverage report
         run: poetry run pytest -s --junitxml=./test-report.xml --cov=./ --cov-report=xml .
 
