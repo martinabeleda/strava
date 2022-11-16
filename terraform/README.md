@@ -23,6 +23,15 @@ kubectl cluster-info
 
 ### Relational Database Service
 
+Used the [Hashicorp RDS Tutorial](https://developer.hashicorp.com/terraform/tutorials/aws/aws-rds) as a template.
+
+Connect to the DB:
+
+```shell
+psql -h $(terraform output -raw rds_hostname) -p $(terraform output -raw rds_port) -U $(terraform output -raw rds_username) postgres
+```
+
+
 ## Deployment
 
 At the moment, infrastructure is deployed manually through the terraform CLI.
