@@ -16,6 +16,20 @@ Verify:
 kubectl get secret regcred --output=yaml
 ```
 
+## Build a new version
+
+For now, I'm building the service locally using:
+
+```shell
+docker build -t martinabeleda/strava:v0.0.4 .
+```
+
+Push this to dockerhub
+
+```shell
+docker push martinabeleda/strava:v0.0.4
+```
+
 ## Deploy service
 
 Deploy the service and the deployment:
@@ -30,3 +44,16 @@ Now, let's port forward the service and access the docs link:
 kubectl port-forward service/strava 8080:8080
 ```
 
+## Running migrations
+
+For now, migrations are also manual. First, exec into one of the service pods:
+
+```shell
+kubectl exec -it deploy/strava -- bash
+```
+
+Then, run the migration from inside the pod:
+
+```shell
+$ alembic upgrade head
+```

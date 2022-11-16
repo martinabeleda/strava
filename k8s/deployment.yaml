@@ -28,7 +28,7 @@ spec:
         app: strava
     spec:
       containers:
-      - image: martinabeleda/strava:v0.0.2
+      - image: martinabeleda/strava:v0.0.4
         name: strava
         env:
         - name: PROJECT_NAME

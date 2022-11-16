@@ -17,6 +17,8 @@ COPY pyproject.toml poetry.lock* /app/
 RUN poetry install --no-root --no-dev
 
 COPY ./strava /app/strava
+COPY ./alembic /app/alembic 
+COPY alembic.ini /app/alembic.ini
 
 EXPOSE 8080
 
