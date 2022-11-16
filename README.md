@@ -1,6 +1,6 @@
 # strava
 
-![built and test](https://github.com/github/docs/actions/workflows/build_and_test.yml/badge.svg)
+![built and test](https://github.com/martinabeleda/strava/actions/workflows/build_and_test.yml/badge.svg)
 
 A strava clone service for storing running, hiking and ski routes
 
