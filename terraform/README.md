@@ -8,6 +8,19 @@ This folder contains terraform manifests for provisioning our infrastructure
 
 Used the [Hashicorp EKS Tutorial](https://developer.hashicorp.com/terraform/tutorials/kubernetes/eks) as a template.
 
+Configure `kubectl` with cluster credentials:
+
+```shell
+aws eks --region $(terraform output -raw region) update-kubeconfig \
+    --name $(terraform output -raw cluster_name)
+```
+
+Verify the cluster:
+
+```shell
+kubectl cluster-info
+```
+
 ### Relational Database Service
 
 ## Deployment
@@ -30,4 +43,12 @@ Now, apply the changes:
 
 ```shell
 terraform apply
+```
+
+## Destroy resources
+
+Now, let's remove any of the resources we created:
+
+```shell
+terraform destroy
 ```
