@@ -4,8 +4,10 @@ from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from geoalchemy2.shape import to_shape
 from geojson_pydantic import LineString
+from geojson_pydantic.geometries import Geometry
 from shapely.geometry import mapping, shape
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from strava import schemas
 from strava.db.depends import get_db
@@ -39,3 +41,16 @@ async def create_route(
 
     db_obj.route = LineString(**mapping(to_shape(db_obj.route)))
     return db_obj
+
+
+@router.post("/intersect", response_model=List[schemas.Route])
+async def route_spatial_query(
+    geometry: Geometry,
+    db: Session = Depends(get_db),
+):
+    """Find the routes that intersect with a geometry"""
+    geom = shape(geometry).wkt
+    routes = db.query(Route).filter(func.ST_INTERSECTS(Route.route, geom)).all()
+    for route in routes:
+        route.route = LineString(**mapping(to_shape(route.route)))
+    return routes
