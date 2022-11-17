@@ -28,7 +28,11 @@ Used the [Hashicorp RDS Tutorial](https://developer.hashicorp.com/terraform/tuto
 Connect to the DB:
 
 ```shell
-psql -h $(terraform output -raw rds_hostname) -p $(terraform output -raw rds_port) -U $(terraform output -raw rds_username) postgres
+psql \
+    -h $(terraform output -raw rds_hostname) \
+    -p $(terraform output -raw rds_port) \
+    -U $(terraform output -raw rds_username) \
+    postgres
 ```
 
 ## Deployment
