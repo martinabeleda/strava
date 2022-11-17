@@ -14,7 +14,7 @@ docker compose up --build
 
 ## User guide
 
-This service manages creating routes for activities much like strava does. A route can have a `name` and `description`, is an `activity` that can be one of `RUNNING`, `HIKING` or `SKIING` and has a `route`. We use geojson to describe the route and specifically a route is a 2D `LineString` to make things simple. 
+This service manages creating routes for activities much like strava does. A route can have a `name` and `description`, is an `activity` that can be one of `RUNNING`, `HIKING` or `SKIING` and has a `route`. We use geojson to describe the route and specifically a route is a 2D `LineString` to make things simple.
 
 ### Creating a route
 
@@ -41,6 +41,20 @@ Now we can list the routes we've created:
 curl -X 'GET' \
   'http://0.0.0.0:8080/strava/v1/routes/' \
   -H 'accept: application/json' | jq
+```
+
+### Spatial queries
+
+We also provide an endpoint for doing spatial queries (intersection) given a `Geometry`. This can be any of the [geometry types](https://github.com/developmentseed/geojson-pydantic/blob/b20bd7ed7c3475d6df650430c864259bb246fcb0/geojson_pydantic/geometries.py#L197) in the [geojson spec](https://www.rfc-editor.org/rfc/rfc7946#section-3.1).
+
+To execute a spatial query, `POST` a geojson containing your query shape to `/strava/v1/routes/intersect`:
+
+```shell
+curl -X 'POST' \
+  'http://localhost:8080/strava/v1/routes/intersect' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{"type":"Polygon","coordinates":[[[-123.98835979521789,49.415858366810966],[-122.91169963896789,49.729333082944635],[-122.01082073271789,49.27270395054359],[-122.25251995146789,48.73940752346975],[-123.98835979521789,49.415858366810966]]]}'
 ```
 
 ## Creating a new migration
