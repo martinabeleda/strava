@@ -4,13 +4,12 @@ metadata:
   name: strava
 spec:
   ports:
-  - port: 8080
+    - port: 8080
   selector:
     app: strava
   clusterIP: None
 
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -28,21 +27,21 @@ spec:
         app: strava
     spec:
       containers:
-      - image: martinabeleda/strava:v0.0.4
-        name: strava
-        env:
-        - name: PROJECT_NAME
-          value: strava
-        - name: POSTGRES_SERVER
-          value: education.cctxv2xiomhf.us-east-2.rds.amazonaws.com:5432
-        - name: POSTGRES_USER
-          value: edu
-        - name: POSTGRES_PASSWORD
-          value: password
-        - name: POSTGRES_DB
-          value: postgres
-        ports:
-        - containerPort: 8080
+        - image: martinabeleda/strava:v0.0.5
           name: strava
+          env:
+            - name: PROJECT_NAME
+              value: strava
+            - name: POSTGRES_SERVER
+              value: education.cctxv2xiomhf.us-east-2.rds.amazonaws.com:5432
+            - name: POSTGRES_USER
+              value: edu
+            - name: POSTGRES_PASSWORD
+              value: password
+            - name: POSTGRES_DB
+              value: postgres
+          ports:
+            - containerPort: 8080
+              name: strava
       imagePullSecrets:
         - name: regcred
