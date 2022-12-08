@@ -1,1 +1,1 @@
-from .routes import Route, RouteCreate
+from .routes import Route, RouteCreate  # noqa
