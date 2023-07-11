@@ -14,7 +14,7 @@ RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python
 # Copy poetry.lock* in case it doesn't exist in the repo
 COPY pyproject.toml poetry.lock* /app/
 
-RUN poetry install --no-root --no-dev
+RUN poetry install --no-root --only main
 
 COPY ./strava /app/strava
 COPY ./alembic /app/alembic 
