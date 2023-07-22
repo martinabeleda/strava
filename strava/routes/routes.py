@@ -6,8 +6,8 @@ from geoalchemy2.shape import to_shape
 from geojson_pydantic import LineString
 from geojson_pydantic.geometries import Geometry
 from shapely.geometry import mapping, shape
-from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 from strava import schemas
 from strava.db.depends import get_db
