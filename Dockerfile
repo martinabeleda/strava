@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.9
+FROM --platform=linux/amd64 python:3.11
 
 WORKDIR /app/
 
@@ -17,7 +17,7 @@ COPY pyproject.toml poetry.lock* /app/
 RUN poetry install --no-root --only main
 
 COPY ./strava /app/strava
-COPY ./alembic /app/alembic 
+COPY ./alembic /app/alembic
 COPY alembic.ini /app/alembic.ini
 
 EXPOSE 8080
