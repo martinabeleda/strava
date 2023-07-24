@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 
 from geojson_pydantic import LineString
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 
 
 class Activity(str, Enum):
@@ -26,9 +26,7 @@ class RouteCreate(RouteBase):
 
 class RouteInDB(RouteCreate):
     id: int
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Route(RouteInDB):
