@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends
 from fastapi.encoders import jsonable_encoder
 from geoalchemy2.shape import to_shape
 from geojson_pydantic import LineString
@@ -45,7 +45,7 @@ async def create_route(
 
 @router.post("/intersect", response_model=List[schemas.Route])
 async def route_spatial_query(
-    geometry: Geometry,
+    geometry: Geometry = Body(...),
     db: Session = Depends(get_db),
 ):
     """Find the routes that intersect with a geometry"""

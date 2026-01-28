@@ -1,6 +1,7 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
-from pydantic import BaseSettings, PostgresDsn, validator
+from pydantic import PostgresDsn, ValidationInfo, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -9,25 +10,30 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
 
     POSTGRES_SERVER: str
-    POSTGRES_USER: str
+    POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
-    def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
+    @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
+    @classmethod
+    def assemble_db_connection(cls, v: Optional[str], info: ValidationInfo) -> Any:
         if isinstance(v, str):
             return v
+
+        host = info.data.get("POSTGRES_SERVER")
+        if not host:
+            return v
+
         return PostgresDsn.build(
             scheme="postgresql",
-            user=values.get("POSTGRES_USER"),
-            password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_SERVER"),
-            path=f"/{values.get('POSTGRES_DB') or ''}",
+            username=info.data.get("POSTGRES_USER"),
+            password=info.data.get("POSTGRES_PASSWORD"),
+            host=host,
+            path=info.data.get("POSTGRES_DB") or "",
         )
 
-    class Config:
-        case_sensitive = True
+    model_config = SettingsConfigDict(case_sensitive=True)
 
 
 settings = Settings()
