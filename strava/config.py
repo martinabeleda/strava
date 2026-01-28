@@ -1,7 +1,6 @@
 from typing import Any, Optional
 
-from pydantic import PostgresDsn, field_validator
-from pydantic_core.core_schema import FieldValidationInfo
+from pydantic import PostgresDsn, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,22 +10,27 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
 
     POSTGRES_SERVER: str
-    POSTGRES_USER: str
+    POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
-    @field_validator("SQLALCHEMY_DATABASE_URI")
-    def assemble_db_connection(cls, v, info: FieldValidationInfo) -> Any:
+    @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
+    @classmethod
+    def assemble_db_connection(cls, v: Optional[str], info: ValidationInfo) -> Any:
         if isinstance(v, str):
+            return v
+
+        host = info.data.get("POSTGRES_SERVER")
+        if not host:
             return v
 
         return PostgresDsn.build(
             scheme="postgresql",
-            user=info.data["POSTGRES_USER"],
-            password=info.data["POSTGRES_PASSWORD"],
-            host=info.data["POSTGRES_SERVER"],
-            path=f"/{info.data['POSTGRES_DB'] or ''}",
+            username=info.data.get("POSTGRES_USER"),
+            password=info.data.get("POSTGRES_PASSWORD"),
+            host=host,
+            path=info.data.get("POSTGRES_DB") or "",
         )
 
     model_config = SettingsConfigDict(case_sensitive=True)

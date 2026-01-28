@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 
 from geojson_pydantic import LineString
-from pydantic import ConfigDict, BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Activity(str, Enum):
