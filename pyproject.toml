@@ -26,9 +26,7 @@ dev = [
   "pytest>=7.2.0",
   "pytest-cov>=4.0.0",
   "pre-commit",
-  "black>=23.7.0",
-  "isort>=5.12.0",
-  "ruff>=0.0.280",
+  "ruff>=0.6.0",
   "httpx>=0.23.0",
 ]
 
@@ -36,13 +34,8 @@ dev = [
 requires = ["hatchling>=1.0.0"]
 build-backend = "hatchling.build"
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 120
-use_parentheses = true
-known_first_party = "strava"
-
-[tool.black]
-max-line-length = 100
+[tool.ruff]
 line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["I"]

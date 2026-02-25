@@ -23,8 +23,8 @@ uv sync --dev
 Run checks and tests:
 
 ```shell
-uv run black --check .
-uv run ruff .
+uv run ruff format --check .
+uv run ruff check .
 uv run pytest -s --junitxml=./test-report.xml --cov=./ --cov-report=xml .
 ```
 
