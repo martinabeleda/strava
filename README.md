@@ -12,6 +12,22 @@ Run the service using docker-compose:
 docker compose up --build
 ```
 
+## Local development with uv
+
+Install dependencies and development tooling with [uv](https://docs.astral.sh/uv/):
+
+```shell
+uv sync --dev
+```
+
+Run checks and tests:
+
+```shell
+uv run black --check .
+uv run ruff .
+uv run pytest -s --junitxml=./test-report.xml --cov=./ --cov-report=xml .
+```
+
 ## User guide
 
 This service manages creating routes for activities much like strava does. A route can have a `name` and `description`, is an `activity` that can be one of `RUNNING`, `HIKING` or `SKIING` and has a `route`. We use geojson to describe the route and specifically a route is a 2D `LineString` to make things simple.
