@@ -10,13 +10,15 @@ RUN apt-get update && \
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
     ln -s /root/.local/bin/uv /usr/local/bin/uv
 
-COPY pyproject.toml /app/
+# Install third-party dependencies first for better layer caching
+COPY pyproject.toml README.md /app/
+RUN uv sync --no-dev --no-install-project
 
-RUN uv sync --no-dev
-
+# Copy the application code and install the project itself
 COPY ./strava /app/strava
 COPY ./alembic /app/alembic
 COPY alembic.ini /app/alembic.ini
+RUN uv sync --no-dev
 
 EXPOSE 8080
 
