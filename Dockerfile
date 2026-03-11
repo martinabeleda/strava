@@ -3,23 +3,23 @@ FROM --platform=linux/amd64 python:3.11
 WORKDIR /app/
 
 RUN apt-get update && \
-    apt-get install -yqq libgeos-dev libpq-dev
+    apt-get install -yqq libgeos-dev libpq-dev curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \
-    cd /usr/local/bin && \
-    ln -s /opt/poetry/bin/poetry && \
-    poetry config virtualenvs.create false
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    ln -s /root/.local/bin/uv /usr/local/bin/uv
 
-# Copy poetry.lock* in case it doesn't exist in the repo
-COPY pyproject.toml poetry.lock* /app/
+# Install third-party dependencies first for better layer caching
+COPY pyproject.toml README.md /app/
+RUN uv sync --no-dev --no-install-project
 
-RUN poetry install --no-root --only main
-
+# Copy the application code and install the project itself
 COPY ./strava /app/strava
 COPY ./alembic /app/alembic
 COPY alembic.ini /app/alembic.ini
+RUN uv sync --no-dev
 
 EXPOSE 8080
 
-CMD ["uvicorn", "strava.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uv", "run", "uvicorn", "strava.main:app", "--host", "0.0.0.0", "--port", "8080"]

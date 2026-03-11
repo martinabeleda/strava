@@ -1,43 +1,41 @@
-[tool.poetry]
+[project]
 name = "strava"
 version = "0.1.0"
 description = "A strava clone service for storing running, hiking and ski routes"
-authors = ["martinabeleda <martin.abeleda@gmail.com>"]
+readme = "README.md"
 license = "MIT"
+requires-python = ">=3.11"
+authors = [
+  { name = "martinabeleda", email = "martin.abeleda@gmail.com" },
+]
+dependencies = [
+  "uvicorn",
+  "fastapi>=0.100.0,<1.0.0",
+  "pydantic>=2.0.0,<3.0.0",
+  "pydantic-settings",
+  "geojson-pydantic",
+  "shapely",
+  "sqlalchemy>=2.0.0,<3.0.0",
+  "geoalchemy2",
+  "alembic",
+  "psycopg2-binary",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-uvicorn = "*"
-fastapi = "^0.100.0"
-pydantic = "^2.0.0"
-pydantic-settings = "*"
-geojson-pydantic = "*"
-shapely = "*"
-sqlalchemy = "^2.0.0"
-geoalchemy2 = "*"
-alembic = "*"
-psycopg2-binary = "*"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.2.0"
-pytest-cov = "^4.0.0"
-pre-commit = "*"
-black = "^23.7.0"
-isort = "^5.12.0"
-ruff = "^0.0.280"
-httpx = "^0.23.0"
+[dependency-groups]
+dev = [
+  "pytest>=7.2.0",
+  "pytest-cov>=4.0.0",
+  "pre-commit",
+  "ruff>=0.6.0",
+  "httpx>=0.23.0",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling>=1.0.0"]
+build-backend = "hatchling.build"
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 120
-use_parentheses = true
-known_first_party = "strava"
-
-[tool.black]
-max-line-length = 100
+[tool.ruff]
 line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["I"]
