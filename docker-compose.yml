@@ -56,4 +56,3 @@ services:
       - ./:/app
     depends_on:
       - migration
-

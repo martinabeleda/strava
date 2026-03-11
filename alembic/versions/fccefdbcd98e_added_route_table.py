@@ -1,10 +1,11 @@
 """Added route table
 
 Revision ID: fccefdbcd98e
-Revises: 
+Revises:
 Create Date: 2022-11-15 04:54:42.317813
 
 """
+
 import geoalchemy2
 import sqlalchemy as sa
 
