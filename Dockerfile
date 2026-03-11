@@ -3,7 +3,7 @@ FROM --platform=linux/amd64 python:3.13-slim
 WORKDIR /app/
 
 RUN apt-get update && \
-    apt-get install -yqq libgeos-dev libpq-dev curl && \
+    apt-get install -yqq gcc libgeos-dev libpq-dev curl && \
     rm -rf /var/lib/apt/lists/*
 
 # Install uv
