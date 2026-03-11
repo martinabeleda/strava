@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "A strava clone service for storing running, hiking and ski routes"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 authors = [
   { name = "martinabeleda", email = "martin.abeleda@gmail.com" },
 ]
