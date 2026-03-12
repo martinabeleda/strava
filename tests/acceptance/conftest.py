@@ -4,9 +4,7 @@ import pytest
 import sqlalchemy
 
 SERVICE_URL = os.environ.get("SERVICE_URL", "http://localhost:8081")
-TEST_DB_URL = os.environ.get(
-    "TEST_DB_URL", "postgresql://postgres:password@localhost:5433/test"
-)
+TEST_DB_URL = os.environ.get("TEST_DB_URL", "postgresql://postgres:password@localhost:5433/test")
 
 
 @pytest.fixture(scope="session")
