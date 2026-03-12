@@ -1,8 +1,9 @@
-# Integration Test Plan
+# Acceptance Test Plan
 
-Add database-backed integration tests using `testcontainers` to spin up a real
-PostGIS instance, run the Alembic migrations, and test all three API endpoints
-against actual SQL — including the `ST_INTERSECTS` spatial query.
+Add database-backed acceptance tests using a dedicated Docker Compose stack to
+spin up a real PostGIS instance, run the Alembic migrations, start the service,
+and test all three API endpoints over HTTP — including the `ST_INTERSECTS`
+spatial query.
 
 ## Why
 
@@ -12,95 +13,85 @@ The unit tests mock the DB session entirely, so they can't catch:
 - Migration regressions (schema out of sync with models)
 - `ST_INTERSECTS` returning wrong results for given geometries
 
-## Approach: testcontainers-python
+## Approach: docker-compose + HTTP acceptance tests
 
-Use `testcontainers[postgres]` to spin up `postgis/postgis:15-3.3` (same image
-as docker-compose.yml) inside the test process. No external DB required — works
-locally and in CI.
+A dedicated `docker-compose.test.yml` brings up three services:
 
-Session-scoped fixture creates the container once per test run; each test wraps
-its writes in a transaction that rolls back, keeping tests isolated and fast.
+- `db` — `postgis/postgis:15-3.3` on port `5433` with `POSTGRES_DB=test`
+- `migration` — runs `alembic upgrade head` once, depends on `db` healthy
+- `service` — the FastAPI app on port `8081`, depends on migration completing
 
-## Steps
+Tests in `tests/acceptance/` make real HTTP calls via `httpx` to `localhost:8081`.
+A session-scoped SQLAlchemy engine connects directly to the test DB on port `5433`
+to `TRUNCATE TABLE route` before each test, keeping tests isolated without
+restarting the stack.
 
-### 1. Add dependency
+No new Python dependencies required — `httpx` and `sqlalchemy` are already in
+the project.
 
-```toml
-# pyproject.toml [dependency-groups] dev
-"testcontainers[postgres]>=4.0.0",
-```
-
-### 2. Create `tests/integration/conftest.py`
-
-Session-scoped fixtures:
+## File Layout
 
 ```
-container      — starts postgis/postgis:15-3.3, exposes a random port
-engine         — SQLAlchemy engine pointed at the container
-tables         — runs alembic upgrade head (or create_all) once
-db_session     — per-test: opens a transaction, yields session, rolls back
-client         — FastAPI TestClient with get_db overridden to use db_session
-```
-
-Key detail: use a nested transaction (SAVEPOINT) so each test rolls back
-without restarting the container:
-
-```python
-@pytest.fixture
-def db_session(engine):
-    connection = engine.connect()
-    transaction = connection.begin()
-    session = Session(bind=connection)
-    yield session
-    session.close()
-    transaction.rollback()
-    connection.close()
-```
-
-### 3. Create `tests/integration/test_routes_integration.py`
-
-#### `TestListRoutes`
-- Empty DB returns `[]`
-- Inserted route appears in list response
-- `offset` / `limit` pagination is respected
-
-#### `TestCreateRoute`
-- POST creates a row in the `route` table
-- Response contains the assigned `id`
-- Geometry round-trips correctly (GeoJSON in → GeoJSON out)
-- All three `Activity` values persist and are returned correctly
-
-#### `TestSpatialQuery`
-- Route that intersects the query geometry is returned
-- Route that does not intersect is excluded
-- Query with a Point geometry that lies on a route returns that route
-- Empty DB returns `[]`
-
-### 4. CI — `.github/workflows/test.yml`
-
-No extra services block needed; testcontainers handles the container lifecycle
-via the Docker socket. Ensure the runner has Docker available (standard on
-`ubuntu-latest`).
-
-## File Layout After
-
-```
+docker-compose.test.yml              # dedicated test stack (POSTGRES_DB=test)
 tests/
-├── conftest.py                          # existing unit-test fixtures
+├── conftest.py                      # existing unit-test fixtures
 ├── test_schemas.py
 ├── test_config.py
 ├── test_geometry.py
 ├── test_routes.py
-└── integration/
+└── acceptance/
     ├── __init__.py
-    ├── conftest.py                      # container + session fixtures
-    └── test_routes_integration.py      # DB-backed endpoint tests
+    ├── conftest.py                  # engine + clean_db + base_url fixtures
+    └── test_routes.py              # HTTP acceptance tests
 ```
 
-## Notes
+## Running Tests
 
-- Run unit tests only: `uv run pytest tests/ --ignore=tests/integration`
-- Run integration tests only: `uv run pytest tests/integration`
-- Run everything: `uv run pytest`
-- The container adds ~10–15 s startup overhead once per session, then individual
-  tests run at near-unit-test speed due to the rollback strategy.
+```bash
+# Unit tests only (no Docker required)
+uv run pytest
+
+# Acceptance tests (requires compose stack)
+docker compose -f docker-compose.test.yml up --build --wait
+uv run pytest tests/acceptance -v
+docker compose -f docker-compose.test.yml down -v
+```
+
+`norecursedirs = ["acceptance"]` in `pyproject.toml` ensures `uv run pytest`
+never collects `tests/acceptance` automatically.
+
+## Environment Variables
+
+| Variable      | Default                                         | Purpose                        |
+|---------------|-------------------------------------------------|--------------------------------|
+| `SERVICE_URL` | `http://localhost:8081`                         | Base URL of the running service |
+| `TEST_DB_URL` | `postgresql://postgres:password@localhost:5433/test` | Direct DB access for truncation |
+
+## Test Coverage
+
+### `TestListRoutes`
+- Empty DB returns `[]`
+- Inserted route appears in list response
+- `offset` / `limit` pagination is respected
+
+### `TestCreateRoute`
+- Response contains assigned `id`
+- Geometry round-trips correctly (GeoJSON in → GeoJSON out)
+- All three `Activity` values persist and are returned correctly
+- Route is persisted to the DB (visible via list endpoint)
+
+### `TestSpatialQuery`
+- Empty DB returns `[]`
+- Route that intersects the query polygon is returned
+- Route that does not intersect is excluded
+- Point that lies on a route returns that route
+
+## CI — `.github/workflows/build_and_test.yml`
+
+The `acceptance-test` job:
+1. Installs Python deps with `uv`
+2. Builds and starts the compose stack with `docker compose up --build --wait`
+3. Runs `uv run pytest tests/acceptance -v`
+4. Tears down with `docker compose down -v` (runs even on failure)
+
+`ubuntu-latest` has Docker available, so no extra setup is needed.
