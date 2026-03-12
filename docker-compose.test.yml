@@ -18,7 +18,7 @@ services:
 
   migration:
     build: ./
-    command: [bash, -c, "alembic upgrade head"]
+    command: [uv, run, alembic, upgrade, head]
     environment:
       - POSTGRES_SERVER=db:5432
       - POSTGRES_USER=postgres
