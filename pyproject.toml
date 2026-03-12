@@ -34,6 +34,9 @@ dev = [
 requires = ["hatchling>=1.0.0"]
 build-backend = "hatchling.build"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.ruff]
 line-length = 100
 
