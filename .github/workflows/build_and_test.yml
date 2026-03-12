@@ -18,6 +18,24 @@ jobs:
       - name: Run tests and generate coverage report
         run: uv run pytest -s --junitxml=./test-report.xml --cov=./ --cov-report=xml .
 
+  acceptance-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: uv sync --frozen --dev
+      - name: Start test stack
+        run: docker compose -f docker-compose.test.yml up --build --wait
+      - name: Run acceptance tests
+        run: uv run pytest tests/acceptance -v
+      - name: Tear down test stack
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
+
   build:
     runs-on: ubuntu-latest
     steps:

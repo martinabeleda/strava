@@ -36,6 +36,7 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+norecursedirs = ["acceptance", ".venv", ".git", "__pycache__"]
 
 [tool.ruff]
 line-length = 100
