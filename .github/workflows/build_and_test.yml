@@ -4,6 +4,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
+      ENVIRONMENT: ci
       LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
     steps:
       - uses: actions/checkout@v4
@@ -23,6 +24,7 @@ jobs:
   acceptance-test:
     runs-on: ubuntu-latest
     env:
+      ENVIRONMENT: ci
       LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
     steps:
       - uses: actions/checkout@v4

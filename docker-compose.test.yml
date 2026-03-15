@@ -19,7 +19,7 @@ services:
     command: [uv, run, alembic, upgrade, head]
     environment:
       - PROJECT_NAME=strava-test
-      - ENVIRONMENT=test
+      - ENVIRONMENT=${ENVIRONMENT:-test}
       - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
       - POSTGRES_SERVER=db:5432
       - POSTGRES_USER=postgres
@@ -33,7 +33,7 @@ services:
     build: ./
     environment:
       - PROJECT_NAME=strava-test
-      - ENVIRONMENT=test
+      - ENVIRONMENT=${ENVIRONMENT:-test}
       - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
       - POSTGRES_SERVER=db:5432
       - POSTGRES_USER=postgres
