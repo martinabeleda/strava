@@ -25,9 +25,10 @@ def build_settings(**overrides):
     return Settings(**values)
 
 
-def test_configure_logfire_uses_default_service_name():
+def test_configure_logfire_uses_default_service_name(monkeypatch):
     settings = build_settings()
     code_source = object()
+    monkeypatch.delenv("GITHUB_SHA", raising=False)
 
     with patch(
         "strava.observability.logfire.CodeSource", return_value=code_source

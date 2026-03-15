@@ -22,10 +22,17 @@ class TestSettings:
 
         assert not settings.LOGFIRE_SEND_TO_LOGFIRE
 
-    def test_environment_default(self):
-        from strava.config import settings
+    def test_environment_default(self, monkeypatch):
+        monkeypatch.setenv("PROJECT_NAME", "test")
+        monkeypatch.setenv("POSTGRES_SERVER", "localhost")
+        monkeypatch.setenv("POSTGRES_PASSWORD", "pass")
+        monkeypatch.setenv("POSTGRES_DB", "db")
+        monkeypatch.delenv("ENVIRONMENT", raising=False)
 
-        assert settings.ENVIRONMENT == "development"
+        from strava.config import Settings
+
+        s = Settings()
+        assert s.ENVIRONMENT == "development"
 
     def test_logfire_token_default(self, monkeypatch):
         monkeypatch.setenv("PROJECT_NAME", "test")
