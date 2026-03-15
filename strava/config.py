@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import PostgresDsn, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/strava/v1"
 
     PROJECT_NAME: str
+    ENVIRONMENT: str = "development"
+    LOGFIRE_SEND_TO_LOGFIRE: bool | Literal["if-token-present"] = "if-token-present"
 
     POSTGRES_SERVER: str
     POSTGRES_USER: str = "postgres"

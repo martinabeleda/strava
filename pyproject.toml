@@ -19,6 +19,9 @@ dependencies = [
   "geoalchemy2",
   "alembic",
   "psycopg2",
+  "logfire>=4.29.0",
+  "opentelemetry-instrumentation-fastapi>=0.60b1",
+  "opentelemetry-instrumentation-sqlalchemy>=0.60b1",
 ]
 
 [dependency-groups]

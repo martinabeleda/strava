@@ -17,6 +17,16 @@ class TestSettings:
 
         assert settings.PROJECT_NAME == "strava-test"
 
+    def test_logfire_send_to_logfire_default(self):
+        from strava.config import settings
+
+        assert settings.LOGFIRE_SEND_TO_LOGFIRE == "if-token-present"
+
+    def test_environment_default(self):
+        from strava.config import settings
+
+        assert settings.ENVIRONMENT == "development"
+
     def test_settings_from_env(self, monkeypatch):
         monkeypatch.setenv("PROJECT_NAME", "my-project")
         monkeypatch.setenv("POSTGRES_SERVER", "db-host")
