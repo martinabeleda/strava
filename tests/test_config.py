@@ -39,6 +39,11 @@ class TestSettings:
         s = Settings()
         assert s.LOGFIRE_TOKEN is None
 
+    def test_logfire_code_source_repository_default(self):
+        from strava.config import settings
+
+        assert settings.LOGFIRE_CODE_SOURCE_REPOSITORY == "https://github.com/martinabeleda/strava"
+
     def test_settings_from_env(self, monkeypatch):
         monkeypatch.setenv("PROJECT_NAME", "my-project")
         monkeypatch.setenv("POSTGRES_SERVER", "db-host")
