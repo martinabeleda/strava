@@ -20,7 +20,7 @@ class TestSettings:
     def test_logfire_send_to_logfire_default(self):
         from strava.config import settings
 
-        assert settings.LOGFIRE_SEND_TO_LOGFIRE == "if-token-present"
+        assert not settings.LOGFIRE_SEND_TO_LOGFIRE
 
     def test_environment_default(self):
         from strava.config import settings
