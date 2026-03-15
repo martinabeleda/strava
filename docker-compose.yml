@@ -1,5 +1,4 @@
 services:
-
   db:
     image: postgis/postgis:17-3.5
     environment:
@@ -51,6 +50,7 @@ services:
       - PROJECT_NAME=strava
       - ENVIRONMENT=development
       - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - POSTGRES_SERVER=db:5432
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password

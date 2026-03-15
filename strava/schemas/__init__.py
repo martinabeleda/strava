@@ -1,1 +1,8 @@
-from .routes import Route, RouteCreate  # noqa
+from .routes import (  # noqa
+    BoundingBox,
+    Route,
+    RouteCreate,
+    RouteSearchInterpretation,
+    RouteSearchRequest,
+    RouteSearchResponse,
+)

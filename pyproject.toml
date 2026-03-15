@@ -19,9 +19,10 @@ dependencies = [
   "geoalchemy2",
   "alembic",
   "psycopg2",
-  "logfire[system-metrics]>=4.29.0",
+  "logfire[httpx,system-metrics]>=4.29.0",
   "opentelemetry-instrumentation-fastapi>=0.60b1",
   "opentelemetry-instrumentation-sqlalchemy>=0.60b1",
+  "pydantic-ai-slim[openai]>=1.68.0",
 ]
 
 [dependency-groups]

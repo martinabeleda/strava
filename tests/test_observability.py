@@ -57,16 +57,19 @@ def test_configure_observability_wires_logfire():
     settings = build_settings()
     code_source = object()
 
-    with patch("strava.observability.logfire.CodeSource", return_value=code_source):
-        with patch("strava.observability.logfire.configure") as configure:
-            with patch("strava.observability.logfire.instrument_fastapi") as instrument_fastapi:
-                with patch(
-                    "strava.observability.logfire.instrument_sqlalchemy"
-                ) as instrument_sqlalchemy:
-                    with patch(
-                        "strava.observability.logfire.instrument_system_metrics"
-                    ) as instrument_system_metrics:
-                        configure_observability(app, settings, engine)
+    with (
+        patch("strava.observability.logfire.CodeSource", return_value=code_source),
+        patch("strava.observability.logfire.configure") as configure,
+        patch("strava.observability.logfire.instrument_fastapi") as instrument_fastapi,
+        patch("strava.observability.logfire.instrument_httpx") as instrument_httpx,
+        patch("strava.observability.logfire.instrument_openai") as instrument_openai,
+        patch("strava.observability.logfire.instrument_pydantic_ai") as instrument_pydantic_ai,
+        patch("strava.observability.logfire.instrument_sqlalchemy") as instrument_sqlalchemy,
+        patch(
+            "strava.observability.logfire.instrument_system_metrics"
+        ) as instrument_system_metrics,
+    ):
+        configure_observability(app, settings, engine)
 
     configure.assert_called_once_with(
         service_name="strava-test",
@@ -76,6 +79,9 @@ def test_configure_observability_wires_logfire():
         code_source=code_source,
     )
     instrument_fastapi.assert_called_once_with(app)
+    instrument_httpx.assert_called_once_with()
+    instrument_openai.assert_called_once_with()
+    instrument_pydantic_ai.assert_called_once_with()
     instrument_sqlalchemy.assert_called_once_with(engine)
     instrument_system_metrics.assert_called_once_with()
 

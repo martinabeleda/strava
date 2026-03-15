@@ -16,6 +16,13 @@ ROUTE_B = {
     "description": None,
 }
 
+ROUTE_C = {
+    "name": "Sydney Harbour Loop",
+    "route": {"type": "LineString", "coordinates": [[0.0, 0.0], [1.0, 1.0]]},
+    "activity": "RUNNING",
+    "description": "A run around Circular Quay",
+}
+
 # Polygon that covers (0,0)-(2,2) — intersects ROUTE_A but not ROUTE_B
 INTERSECTING_POLYGON = {
     "type": "Polygon",
@@ -178,3 +185,26 @@ class TestListRoutesFiltering:
     def test_invalid_bbox_returns_validation_error(self, base_url):
         response = httpx.get(f"{base_url}{BASE_PATH}/?bbox=0.0,1.0,2.0")
         assert response.status_code == 422
+
+
+class TestConversationalRouteSearch:
+    def test_search_returns_structured_filters_and_matching_routes(self, base_url):
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_A)
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_C)
+
+        response = httpx.post(
+            f"{base_url}{BASE_PATH}/search",
+            json={"query": "Running routes in Sydney Australia"},
+        )
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["query"] == "Running routes in Sydney Australia"
+        assert payload["filters"]["activity"] == "RUNNING"
+        assert payload["filters"]["bbox"] == {
+            "min_lon": -1.0,
+            "min_lat": -1.0,
+            "max_lon": 2.0,
+            "max_lat": 2.0,
+        }
+        assert [route["name"] for route in payload["routes"]] == ["Sydney Harbour Loop"]

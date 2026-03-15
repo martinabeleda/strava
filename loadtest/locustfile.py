@@ -23,6 +23,10 @@ class StravaApiUser(HttpUser):
     def routes_path(self) -> str:
         return f"{API_PREFIX}/routes/"
 
+    @property
+    def route_search_path(self) -> str:
+        return f"{API_PREFIX}/routes/search"
+
     def create_route_payload(self) -> dict:
         suffix = uuid4().hex[:8]
         return {
@@ -65,3 +69,14 @@ class StravaApiUser(HttpUser):
             json=INTERSECTING_POLYGON,
             name="POST /routes/intersect",
         )
+
+    @task(1)
+    def conversational_route_search(self) -> None:
+        with self.client.post(
+            self.route_search_path,
+            json={"query": "Running routes in Sydney Australia"},
+            name="POST /routes/search",
+            catch_response=True,
+        ) as response:
+            if response.status_code != 200:
+                response.failure(f"unexpected status code: {response.status_code}")
