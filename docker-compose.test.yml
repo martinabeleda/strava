@@ -16,7 +16,7 @@ services:
 
   migration:
     build: ./
-    command: [uv, run, alembic, upgrade, head]
+    command: [alembic, upgrade, head]
     environment:
       - PROJECT_NAME=strava-test
       - ENVIRONMENT=${ENVIRONMENT:-test}

@@ -130,3 +130,6 @@ dmypy.json
 
 # WKT test files
 *.wkt
+
+# Load test reports
+loadtest/reports/

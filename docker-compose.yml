@@ -17,10 +17,10 @@ services:
 
   migration:
     build: ./
-    command: [uv, run, alembic, upgrade, head]
+    command: [alembic, upgrade, head]
     volumes:
-      - ./:/root/app
-    working_dir: /root/app
+      - ./:/app
+    working_dir: /app
     environment:
       - PROJECT_NAME=strava
       - ENVIRONMENT=development
@@ -38,8 +38,6 @@ services:
   service:
     build: ./
     command:
-      - uv
-      - run
       - python
       - "-m"
       - uvicorn
@@ -66,6 +64,6 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/docs || exit 1"]
-      interval: 5s
+      interval: 10s
       timeout: 10s
-      retries: 10
+      retries: 5

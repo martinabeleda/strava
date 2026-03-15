@@ -1,0 +1,13 @@
+.git
+.github
+.coverage
+.env
+.logfire
+.pre-commit-config.yaml
+.pytest_cache
+.ruff_cache
+.uv-cache
+.venv
+__pycache__
+tests
+loadtest

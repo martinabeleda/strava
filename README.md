@@ -31,6 +31,49 @@ uv run ruff check .
 uv run pytest -s --junitxml=./test-report.xml --cov=./ --cov-report=xml .
 ```
 
+## Load testing
+
+Install the development dependencies first:
+
+```shell
+uv sync --dev
+```
+
+With the local compose stack running on `http://localhost:8080`, start Locust with:
+
+```shell
+make load-test
+```
+
+That opens the Locust UI on `http://localhost:8089` and targets `http://localhost:8080` by default.
+
+To generate report files locally, run:
+
+```shell
+make load-test-report
+```
+
+That writes artifacts to `loadtest/reports/` by default:
+
+- `loadtest/reports/locust.html`
+- `loadtest/reports/locust_stats.csv`
+- `loadtest/reports/locust_failures.csv`
+- `loadtest/reports/locust_exceptions.csv`
+
+You can override the defaults with `LOCUST_USERS`, `LOCUST_SPAWN_RATE`, `LOCUST_RUN_TIME`, `LOCUST_HOST`, `LOAD_TEST_REPORT_DIR`, and `LOAD_TEST_REPORT_PREFIX`.
+
+To run headless against local compose:
+
+```shell
+LOCUST_HOST=http://localhost:8080 uv run locust -f loadtest/locustfile.py --headless --users 10 --spawn-rate 2 --run-time 1m
+```
+
+To point the same test at a dev or prod service in a cluster, change only the target host and, if needed, the API prefix:
+
+```shell
+LOCUST_HOST=https://strava.dev.example.com STRAVA_API_PREFIX=/strava/v1 uv run locust -f loadtest/locustfile.py --headless --users 25 --spawn-rate 5 --run-time 5m
+```
+
 ## User guide
 
 This service manages creating routes for activities much like strava does. A route can have a `name` and `description`, is an `activity` that can be one of `RUNNING`, `HIKING` or `SKIING` and has a `route`. We use geojson to describe the route and specifically a route is a 2D `LineString` to make things simple.
