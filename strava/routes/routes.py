@@ -10,6 +10,7 @@ from strava import schemas
 from strava.db.depends import get_db
 from strava.models.route import Route
 from strava.schemas.routes import Activity
+from strava.services.route_search import RouteSearchService, fetch_routes, get_route_search_service
 from strava.utils.geometry import geojson_to_wkt, wkt_to_linestring
 
 router = APIRouter(prefix="/routes")
@@ -30,34 +31,10 @@ async def list_items(
     - **name**: case-insensitive substring match
     - **bbox**: `minLon,minLat,maxLon,maxLat` — returns routes intersecting the box
     """
-    query = db.query(Route)
-
-    if activity:
-        query = query.filter(Route.activity == activity)
-
-    if name:
-        query = query.filter(Route.name.ilike(f"%{name}%"))
-
-    if bbox:
-        parts = bbox.split(",")
-        if len(parts) != 4:
-            raise HTTPException(
-                status_code=422,
-                detail="bbox must be 4 comma-separated numbers: minLon,minLat,maxLon,maxLat",
-            )
-        try:
-            minx, miny, maxx, maxy = [float(p) for p in parts]
-        except ValueError:
-            raise HTTPException(status_code=422, detail="bbox values must be numeric")
-        envelope = (
-            f"POLYGON(({minx} {miny},{maxx} {miny},{maxx} {maxy},{minx} {maxy},{minx} {miny}))"
-        )
-        query = query.filter(func.ST_Intersects(Route.route, envelope))
-
-    results = query.offset(offset).limit(limit).all()
-    for result in results:
-        result.route = wkt_to_linestring(result.route)
-    return results
+    try:
+        return fetch_routes(db, offset=offset, limit=limit, activity=activity, name=name, bbox=bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.post("/", response_model=schemas.Route)
@@ -89,3 +66,16 @@ async def route_spatial_query(
     for route in routes:
         route.route = wkt_to_linestring(route.route)
     return routes
+
+
+@router.post("/search", response_model=schemas.RouteSearchResponse)
+async def conversational_route_search(
+    request: schemas.RouteSearchRequest,
+    db: Session = Depends(get_db),
+    route_search_service: RouteSearchService = Depends(get_route_search_service),
+):
+    """Search routes from a conversational query."""
+    try:
+        return await route_search_service.search(request.query, db)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

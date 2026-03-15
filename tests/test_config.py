@@ -116,3 +116,21 @@ class TestSettings:
 
         s = instantiate_settings()
         assert s.LOGFIRE_TOKEN == "test-token"
+
+    def test_openai_model_default(self, monkeypatch):
+        monkeypatch.setenv("PROJECT_NAME", "test")
+        monkeypatch.setenv("POSTGRES_SERVER", "localhost")
+        monkeypatch.setenv("POSTGRES_PASSWORD", "pass")
+        monkeypatch.setenv("POSTGRES_DB", "db")
+
+        s = instantiate_settings()
+        assert s.OPENAI_MODEL == "gpt-4.1-mini"
+
+    def test_nominatim_search_url_default(self, monkeypatch):
+        monkeypatch.setenv("PROJECT_NAME", "test")
+        monkeypatch.setenv("POSTGRES_SERVER", "localhost")
+        monkeypatch.setenv("POSTGRES_PASSWORD", "pass")
+        monkeypatch.setenv("POSTGRES_DB", "db")
+
+        s = instantiate_settings()
+        assert s.NOMINATIM_SEARCH_URL == "https://nominatim.openstreetmap.org/search"

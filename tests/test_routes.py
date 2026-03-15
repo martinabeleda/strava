@@ -1,6 +1,15 @@
 from unittest.mock import patch
 
 from geojson_pydantic import LineString as GeoJsonLineString
+from pydantic_ai.models.test import TestModel
+
+from strava.config import settings
+from strava.main import app
+from strava.services.route_search import (
+    RouteSearchService,
+    build_route_search_agent,
+    get_route_search_service,
+)
 
 BASE_URL = "/strava/v1/routes"
 
@@ -48,7 +57,7 @@ class TestListRoutes:
         mock_db.query.return_value.offset.return_value.limit.return_value.all.return_value = [route]
 
         with patch(
-            "strava.routes.routes.wkt_to_linestring", return_value=MOCK_LINESTRING
+            "strava.services.route_search.wkt_to_linestring", return_value=MOCK_LINESTRING
         ) as mock_convert:
             response = client.get(f"{BASE_URL}/")
 
@@ -194,4 +203,77 @@ class TestSpatialQuery:
         assert response.json()[0]["route"] == {
             "type": "LineString",
             "coordinates": [[0.0, 0.0], [1.0, 1.0]],
+        }
+
+
+class TestConversationalRouteSearch:
+    def test_search_returns_routes_from_mocked_model_output(self, client, mock_db):
+        route = type(
+            "RouteResult",
+            (),
+            {
+                "id": 7,
+                "name": "Sydney Harbour Loop",
+                "route": "LINESTRING (151.2093 -33.8688, 151.2153 -33.8568)",
+                "activity": "RUNNING",
+                "description": "A run around Circular Quay",
+            },
+        )()
+        (
+            mock_db.query.return_value.filter.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value
+        ) = [route]
+
+        model = TestModel(
+            call_tools=[],
+            custom_output_args={
+                "activity": "RUNNING",
+                "bbox": {
+                    "min_lon": 151.18,
+                    "min_lat": -33.89,
+                    "max_lon": 151.24,
+                    "max_lat": -33.84,
+                },
+            },
+        )
+        app.dependency_overrides[get_route_search_service] = lambda: RouteSearchService(
+            settings,
+            agent=build_route_search_agent(model),
+        )
+
+        try:
+            with patch(
+                "strava.services.route_search.wkt_to_linestring", return_value=MOCK_LINESTRING
+            ):
+                response = client.post(
+                    f"{BASE_URL}/search",
+                    json={"query": "Running routes in Sydney Australia"},
+                )
+        finally:
+            app.dependency_overrides.pop(get_route_search_service, None)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "query": "Running routes in Sydney Australia",
+            "filters": {
+                "activity": "RUNNING",
+                "name": None,
+                "bbox": {
+                    "min_lon": 151.18,
+                    "min_lat": -33.89,
+                    "max_lon": 151.24,
+                    "max_lat": -33.84,
+                },
+            },
+            "routes": [
+                {
+                    "id": 7,
+                    "name": "Sydney Harbour Loop",
+                    "route": {
+                        "type": "LineString",
+                        "coordinates": [[0.0, 0.0], [1.0, 1.0]],
+                    },
+                    "activity": "RUNNING",
+                    "description": "A run around Circular Quay",
+                }
+            ],
         }

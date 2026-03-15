@@ -24,6 +24,8 @@ def configure_logfire(settings: Settings, *, service_name: str | None = None) ->
 def configure_observability(app: FastAPI, settings: Settings, engine: Engine) -> None:
     configure_logfire(settings)
     logfire.instrument_fastapi(app)
+    logfire.instrument_openai()
+    logfire.instrument_pydantic_ai()
     logfire.instrument_sqlalchemy(engine)
     logfire.instrument_system_metrics()
 
