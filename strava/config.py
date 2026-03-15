@@ -11,9 +11,9 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     OPENAI_API_KEY: str | None = None
     OPENAI_MODEL: str = "gpt-4.1-mini"
+    OPENAI_BASE_URL: str = "https://api.openai.com/v1"
     NOMINATIM_SEARCH_URL: str = "https://nominatim.openstreetmap.org/search"
     NOMINATIM_TIMEOUT_SECONDS: float = 10.0
-    ROUTE_SEARCH_MOCK_RESPONSE: str | None = None
     LOGFIRE_SEND_TO_LOGFIRE: bool | Literal["if-token-present"] = "if-token-present"
     LOGFIRE_TOKEN: str | None = None
     LOGFIRE_CODE_SOURCE_REPOSITORY: str = "https://github.com/martinabeleda/strava"

@@ -1,4 +1,20 @@
 services:
+  llm-stub:
+    build: ./
+    command:
+      - python
+      - "-m"
+      - uvicorn
+      - "strava.testing.openai_stub:app"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8090"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8090/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   db:
     image: postgis/postgis:17-3.5
@@ -16,7 +32,10 @@ services:
 
   migration:
     build: ./
-    command: [alembic, upgrade, head]
+    command:
+      - alembic
+      - upgrade
+      - head
     environment:
       - PROJECT_NAME=strava-test
       - ENVIRONMENT=${ENVIRONMENT:-test}
@@ -25,6 +44,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=test
+    links:
+      - db
     depends_on:
       db:
         condition: service_healthy
@@ -35,7 +56,8 @@ services:
       - PROJECT_NAME=strava-test
       - ENVIRONMENT=${ENVIRONMENT:-test}
       - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
-      - ROUTE_SEARCH_MOCK_RESPONSE={"activity":"RUNNING","bbox":{"min_lon":-1.0,"min_lat":-1.0,"max_lon":2.0,"max_lat":2.0}}
+      - OPENAI_API_KEY=test-key
+      - OPENAI_BASE_URL=http://llm-stub:8090/v1
       - POSTGRES_SERVER=db:5432
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
@@ -43,6 +65,8 @@ services:
     ports:
       - 8081:8080
     depends_on:
+      llm-stub:
+        condition: service_healthy
       migration:
         condition: service_completed_successfully
     healthcheck:

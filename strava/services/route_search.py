@@ -1,5 +1,4 @@
 import asyncio
-import json
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Awaitable, Callable
@@ -8,7 +7,6 @@ import httpx
 from openai import AsyncOpenAI
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIChatModel
-from pydantic_ai.models.test import TestModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from sqlalchemy import func
 from sqlalchemy.orm import Query, Session
@@ -21,9 +19,7 @@ from strava.schemas.routes import (
     RouteSearchInterpretation,
     RouteSearchResponse,
 )
-from strava.schemas.routes import (
-    Route as RouteSchema,
-)
+from strava.schemas.routes import Route as RouteSchema
 from strava.utils.geometry import wkt_to_linestring
 
 
@@ -126,18 +122,13 @@ class RouteSearchService:
         self._last_geocode_request_started_at = 0.0
 
     def _build_default_agent(self) -> Agent[RouteSearchDeps, RouteSearchInterpretation]:
-        if self.settings.ROUTE_SEARCH_MOCK_RESPONSE:
-            return build_route_search_agent(
-                TestModel(
-                    call_tools=[],
-                    custom_output_args=json.loads(self.settings.ROUTE_SEARCH_MOCK_RESPONSE),
-                )
-            )
-
         if not self.settings.OPENAI_API_KEY:
             raise RuntimeError("OPENAI_API_KEY must be configured for conversational route search")
 
-        client = AsyncOpenAI(api_key=self.settings.OPENAI_API_KEY)
+        client = AsyncOpenAI(
+            api_key=self.settings.OPENAI_API_KEY,
+            base_url=self.settings.OPENAI_BASE_URL,
+        )
         provider = OpenAIProvider(openai_client=client)
         model = OpenAIChatModel(self.settings.OPENAI_MODEL, provider=provider)
         return build_route_search_agent(model)
@@ -182,7 +173,7 @@ class RouteSearchService:
             )
             response.raise_for_status()
             payload = response.json()
-        except (httpx.HTTPError, ValueError, json.JSONDecodeError):
+        except (httpx.HTTPError, ValueError):
             return None
 
         if not payload:
