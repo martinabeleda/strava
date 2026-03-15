@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
 
   db:
@@ -19,7 +17,7 @@ services:
 
   migration:
     build: ./
-    command: [bash, -c, "alembic upgrade head"]
+    command: [uv, run, alembic, upgrade, head]
     volumes:
       - ./:/root/app
     working_dir: /root/app
@@ -37,6 +35,10 @@ services:
   service:
     build: ./
     command:
+      - uv
+      - run
+      - python
+      - "-m"
       - uvicorn
       - "strava.main:app"
       - "--host"
@@ -55,4 +57,10 @@ services:
     volumes:
       - ./:/app
     depends_on:
-      - migration
+      migration:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/docs || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
