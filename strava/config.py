@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, cast
 
 from pydantic import PostgresDsn, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -41,4 +41,12 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(case_sensitive=True)
 
 
-settings = Settings()
+def load_settings() -> Settings:
+    """Instantiate env-backed settings at the one place static typing cannot express."""
+    # Pydantic loads required fields from environment variables at runtime, but `ty`
+    # only sees the generated constructor signature and assumes those fields must be
+    # passed explicitly.
+    return cast(Any, Settings)()
+
+
+settings = load_settings()

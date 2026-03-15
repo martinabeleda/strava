@@ -11,7 +11,7 @@ VALID_ROUTE_PAYLOAD = {
     "description": "Test route",
 }
 
-MOCK_LINESTRING = GeoJsonLineString(type="LineString", coordinates=[(0.0, 0.0), (1.0, 1.0)])
+MOCK_LINESTRING = GeoJsonLineString.model_validate(VALID_ROUTE_PAYLOAD["route"])
 
 
 class TestListRoutes:

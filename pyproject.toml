@@ -31,6 +31,7 @@ dev = [
   "pre-commit",
   "ruff>=0.6.0",
   "httpx>=0.23.0",
+  "ty>=0.0.23",
 ]
 
 [build-system]
