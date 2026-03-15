@@ -17,7 +17,7 @@ services:
 
   migration:
     build: ./
-    command: [bash, -c, "alembic upgrade head"]
+    command: [uv, run, alembic, upgrade, head]
     volumes:
       - ./:/root/app
     working_dir: /root/app
@@ -35,6 +35,10 @@ services:
   service:
     build: ./
     command:
+      - uv
+      - run
+      - python
+      - "-m"
       - uvicorn
       - "strava.main:app"
       - "--host"

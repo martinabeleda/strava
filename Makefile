@@ -18,6 +18,7 @@ itest: test
 	docker compose -f docker-compose.test.yml down -v
 
 run:
+	docker compose down -v || true
 	docker compose up --build
 
 build-docker:
