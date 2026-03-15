@@ -52,3 +52,23 @@ class TestSettings:
 
         s = Settings()
         assert str(s.SQLALCHEMY_DATABASE_URI).startswith("postgresql://")
+
+    def test_explicit_database_uri_is_preserved(self, monkeypatch):
+        monkeypatch.setenv("PROJECT_NAME", "test")
+        monkeypatch.setenv("POSTGRES_SERVER", "localhost")
+        monkeypatch.setenv("POSTGRES_PASSWORD", "pass")
+        monkeypatch.setenv("POSTGRES_DB", "db")
+        monkeypatch.setenv("SQLALCHEMY_DATABASE_URI", "postgresql://custom:pass@db/customdb")
+
+        from strava.config import Settings
+
+        s = Settings()
+        assert str(s.SQLALCHEMY_DATABASE_URI) == "postgresql://custom:pass@db/customdb"
+
+    def test_validator_returns_none_without_host(self):
+        from strava.config import Settings
+
+        class Info:
+            data = {}
+
+        assert Settings.assemble_db_connection(None, Info()) is None

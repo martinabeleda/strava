@@ -72,6 +72,15 @@ class TestCreateRoute:
         response = httpx.get(f"{base_url}{BASE_PATH}/")
         assert len(response.json()) == 1
 
+    def test_rejects_invalid_activity(self, base_url):
+        response = httpx.post(f"{base_url}{BASE_PATH}/", json={**ROUTE_A, "activity": "SWIMMING"})
+        assert response.status_code == 422
+
+    def test_preserves_null_description(self, base_url):
+        response = httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_B)
+        assert response.status_code == 200
+        assert response.json()["description"] is None
+
 
 class TestSpatialQuery:
     def test_empty_db_returns_empty_list(self, base_url):
@@ -165,3 +174,7 @@ class TestListRoutesFiltering:
         response = httpx.get(f"{base_url}{BASE_PATH}/?activity=SKIING")
         assert response.status_code == 200
         assert response.json() == []
+
+    def test_invalid_bbox_returns_validation_error(self, base_url):
+        response = httpx.get(f"{base_url}{BASE_PATH}/?bbox=0.0,1.0,2.0")
+        assert response.status_code == 422

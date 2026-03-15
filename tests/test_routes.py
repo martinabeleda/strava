@@ -33,6 +33,32 @@ class TestListRoutes:
         mock_db.query.return_value.offset.assert_called_once_with(10)
         mock_db.query.return_value.offset.return_value.limit.assert_called_once_with(5)
 
+    def test_list_converts_route_geometry_before_returning(self, client, mock_db):
+        route = type(
+            "RouteResult",
+            (),
+            {
+                "id": 1,
+                "name": "Morning Run",
+                "route": "LINESTRING (0 0, 1 1)",
+                "activity": "RUNNING",
+                "description": "Test route",
+            },
+        )()
+        mock_db.query.return_value.offset.return_value.limit.return_value.all.return_value = [route]
+
+        with patch(
+            "strava.routes.routes.wkt_to_linestring", return_value=MOCK_LINESTRING
+        ) as mock_convert:
+            response = client.get(f"{BASE_URL}/")
+
+        assert response.status_code == 200
+        mock_convert.assert_called_once_with("LINESTRING (0 0, 1 1)")
+        assert response.json()[0]["route"] == {
+            "type": "LineString",
+            "coordinates": [[0.0, 0.0], [1.0, 1.0]],
+        }
+
 
 class TestCreateRoute:
     def test_missing_body(self, client):
@@ -142,3 +168,30 @@ class TestSpatialQuery:
         }
         response = client.post(f"{BASE_URL}/intersect", json=payload)
         assert response.status_code == 200
+
+    def test_intersect_converts_route_geometry_before_returning(self, client, mock_db):
+        route = type(
+            "RouteResult",
+            (),
+            {
+                "id": 1,
+                "name": "Morning Run",
+                "route": "LINESTRING (0 0, 1 1)",
+                "activity": "RUNNING",
+                "description": "Test route",
+            },
+        )()
+        mock_db.query.return_value.filter.return_value.all.return_value = [route]
+        payload = {"type": "LineString", "coordinates": [[0.0, 0.0], [1.0, 1.0]]}
+
+        with patch(
+            "strava.routes.routes.wkt_to_linestring", return_value=MOCK_LINESTRING
+        ) as mock_convert:
+            response = client.post(f"{BASE_URL}/intersect", json=payload)
+
+        assert response.status_code == 200
+        mock_convert.assert_called_once_with("LINESTRING (0 0, 1 1)")
+        assert response.json()[0]["route"] == {
+            "type": "LineString",
+            "coordinates": [[0.0, 0.0], [1.0, 1.0]],
+        }
