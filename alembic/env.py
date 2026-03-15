@@ -24,7 +24,7 @@ from strava.observability import configure_migration_observability  # noqa: E402
 target_metadata = Base.metadata
 
 
-def get_url():
+def get_url() -> str:
     user = os.getenv("POSTGRES_USER", "postgres")
     password = os.getenv("POSTGRES_PASSWORD", "")
     server = os.getenv("POSTGRES_SERVER", "db")
@@ -56,13 +56,13 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online():
+def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
     and associate a connection with the context.
     """
-    configuration = config.get_section(config.config_ini_section)
+    configuration = config.get_section(config.config_ini_section) or {}
     configuration["sqlalchemy.url"] = get_url()
     connectable = engine_from_config(
         configuration,

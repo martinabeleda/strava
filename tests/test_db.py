@@ -22,5 +22,5 @@ class TestDbBase:
     def test_base_module_exposes_route_model(self):
         from strava.db.base import Base, Route
 
-        assert Route.__table__.name == "route"
+        assert Route.__tablename__ == "route"
         assert "route" in Base.metadata.tables

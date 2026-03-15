@@ -1,4 +1,5 @@
 import os
+from collections.abc import Generator
 
 # Set required env vars before importing strava modules (Settings() is called at import time)
 os.environ.setdefault("PROJECT_NAME", "strava-test")
@@ -23,7 +24,7 @@ def mock_db() -> MagicMock:
 
 
 @pytest.fixture
-def client(mock_db: MagicMock) -> TestClient:
+def client(mock_db: MagicMock) -> Generator[TestClient, None, None]:
     app.dependency_overrides[get_db] = lambda: mock_db
     with TestClient(app) as c:
         yield c

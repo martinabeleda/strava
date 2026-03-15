@@ -1,3 +1,4 @@
+from typing import Any, cast
 from unittest.mock import MagicMock, patch
 
 from fastapi import FastAPI
@@ -22,7 +23,7 @@ def build_settings(**overrides):
         "LOGFIRE_CODE_SOURCE_REPOSITORY": "https://github.com/martinabeleda/strava",
     }
     values.update(overrides)
-    return Settings(**values)
+    return cast(Any, Settings)(**values)
 
 
 def test_configure_logfire_uses_default_service_name(monkeypatch):

@@ -1,3 +1,15 @@
+from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from strava.config import Settings
+
+
+def instantiate_settings() -> "Settings":
+    from strava.config import Settings
+
+    return cast(Any, Settings)()
+
+
 class TestSettings:
     def test_database_uri_assembled(self):
         from strava.config import settings
@@ -29,9 +41,7 @@ class TestSettings:
         monkeypatch.setenv("POSTGRES_DB", "db")
         monkeypatch.delenv("ENVIRONMENT", raising=False)
 
-        from strava.config import Settings
-
-        s = Settings()
+        s = instantiate_settings()
         assert s.ENVIRONMENT == "development"
 
     def test_logfire_token_default(self, monkeypatch):
@@ -41,9 +51,7 @@ class TestSettings:
         monkeypatch.setenv("POSTGRES_DB", "db")
         monkeypatch.delenv("LOGFIRE_TOKEN", raising=False)
 
-        from strava.config import Settings
-
-        s = Settings()
+        s = instantiate_settings()
         assert s.LOGFIRE_TOKEN is None
 
     def test_logfire_code_source_repository_default(self):
@@ -57,9 +65,7 @@ class TestSettings:
         monkeypatch.setenv("POSTGRES_PASSWORD", "secret")
         monkeypatch.setenv("POSTGRES_DB", "mydb")
 
-        from strava.config import Settings
-
-        s = Settings()
+        s = instantiate_settings()
         assert s.PROJECT_NAME == "my-project"
         assert "db-host" in str(s.SQLALCHEMY_DATABASE_URI)
         assert "mydb" in str(s.SQLALCHEMY_DATABASE_URI)
@@ -71,9 +77,7 @@ class TestSettings:
         monkeypatch.setenv("POSTGRES_PASSWORD", "pass")
         monkeypatch.setenv("POSTGRES_DB", "db")
 
-        from strava.config import Settings
-
-        s = Settings()
+        s = instantiate_settings()
         assert "myuser" in str(s.SQLALCHEMY_DATABASE_URI)
 
     def test_uri_scheme(self, monkeypatch):
@@ -82,9 +86,7 @@ class TestSettings:
         monkeypatch.setenv("POSTGRES_PASSWORD", "pass")
         monkeypatch.setenv("POSTGRES_DB", "db")
 
-        from strava.config import Settings
-
-        s = Settings()
+        s = instantiate_settings()
         assert str(s.SQLALCHEMY_DATABASE_URI).startswith("postgresql://")
 
     def test_explicit_database_uri_is_preserved(self, monkeypatch):
@@ -94,9 +96,7 @@ class TestSettings:
         monkeypatch.setenv("POSTGRES_DB", "db")
         monkeypatch.setenv("SQLALCHEMY_DATABASE_URI", "postgresql://custom:pass@db/customdb")
 
-        from strava.config import Settings
-
-        s = Settings()
+        s = instantiate_settings()
         assert str(s.SQLALCHEMY_DATABASE_URI) == "postgresql://custom:pass@db/customdb"
 
     def test_validator_returns_none_without_host(self):
@@ -105,7 +105,7 @@ class TestSettings:
         class Info:
             data = {}
 
-        assert Settings.assemble_db_connection(None, Info()) is None
+        assert Settings.assemble_db_connection(None, cast(Any, Info())) is None
 
     def test_logfire_token_from_env(self, monkeypatch):
         monkeypatch.setenv("PROJECT_NAME", "test")
@@ -114,7 +114,5 @@ class TestSettings:
         monkeypatch.setenv("POSTGRES_DB", "db")
         monkeypatch.setenv("LOGFIRE_TOKEN", "test-token")
 
-        from strava.config import Settings
-
-        s = Settings()
+        s = instantiate_settings()
         assert s.LOGFIRE_TOKEN == "test-token"
