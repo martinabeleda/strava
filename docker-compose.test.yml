@@ -18,6 +18,8 @@ services:
     build: ./
     command: [uv, run, alembic, upgrade, head]
     environment:
+      - PROJECT_NAME=strava-test
+      - ENVIRONMENT=test
       - POSTGRES_SERVER=db:5432
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
