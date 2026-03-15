@@ -9,8 +9,11 @@ A strava clone service for storing running, hiking and ski routes
 Run the service using docker-compose:
 
 ```shell
+cp .env.example .env
 docker compose up --build
 ```
+
+The dev compose setup reads `LOGFIRE_TOKEN` from `.env` and passes it into the `service` container so Logfire can export telemetry.
 
 ## Local development with uv
 
@@ -47,6 +50,31 @@ curl -X 'POST' \
   "activity": "RUNNING",
   "description": "string"
 }' | jq
+```
+
+### Failing request example
+
+This request uses an invalid `activity` value and should return `422 Unprocessable Entity`:
+
+```shell
+curl -X 'POST' \
+  'http://0.0.0.0:8080/strava/v1/routes/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "name": "broken route",
+  "route": {"type": "LineString", "coordinates": [[0.0, 0.0], [1.0, 1.0]]},
+  "activity": "SWIMMING",
+  "description": "this should fail"
+}' | jq
+```
+
+This request uses an invalid `bbox` value and should also return `422 Unprocessable Entity`:
+
+```shell
+curl -X 'GET' \
+  'http://0.0.0.0:8080/strava/v1/routes/?bbox=1.0,2.0,3.0' \
+  -H 'accept: application/json' | jq
 ```
 
 ### Listing routes

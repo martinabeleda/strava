@@ -19,6 +19,9 @@ dependencies = [
   "geoalchemy2",
   "alembic",
   "psycopg2",
+  "logfire[system-metrics]>=4.29.0",
+  "opentelemetry-instrumentation-fastapi>=0.60b1",
+  "opentelemetry-instrumentation-sqlalchemy>=0.60b1",
 ]
 
 [dependency-groups]
@@ -33,6 +36,9 @@ dev = [
 [build-system]
 requires = ["hatchling>=1.0.0"]
 build-backend = "hatchling.build"
+
+[pytest]
+logfire = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

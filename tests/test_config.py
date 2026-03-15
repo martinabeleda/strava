@@ -17,6 +17,40 @@ class TestSettings:
 
         assert settings.PROJECT_NAME == "strava-test"
 
+    def test_logfire_send_to_logfire_default(self):
+        from strava.config import settings
+
+        assert not settings.LOGFIRE_SEND_TO_LOGFIRE
+
+    def test_environment_default(self, monkeypatch):
+        monkeypatch.setenv("PROJECT_NAME", "test")
+        monkeypatch.setenv("POSTGRES_SERVER", "localhost")
+        monkeypatch.setenv("POSTGRES_PASSWORD", "pass")
+        monkeypatch.setenv("POSTGRES_DB", "db")
+        monkeypatch.delenv("ENVIRONMENT", raising=False)
+
+        from strava.config import Settings
+
+        s = Settings()
+        assert s.ENVIRONMENT == "development"
+
+    def test_logfire_token_default(self, monkeypatch):
+        monkeypatch.setenv("PROJECT_NAME", "test")
+        monkeypatch.setenv("POSTGRES_SERVER", "localhost")
+        monkeypatch.setenv("POSTGRES_PASSWORD", "pass")
+        monkeypatch.setenv("POSTGRES_DB", "db")
+        monkeypatch.delenv("LOGFIRE_TOKEN", raising=False)
+
+        from strava.config import Settings
+
+        s = Settings()
+        assert s.LOGFIRE_TOKEN is None
+
+    def test_logfire_code_source_repository_default(self):
+        from strava.config import settings
+
+        assert settings.LOGFIRE_CODE_SOURCE_REPOSITORY == "https://github.com/martinabeleda/strava"
+
     def test_settings_from_env(self, monkeypatch):
         monkeypatch.setenv("PROJECT_NAME", "my-project")
         monkeypatch.setenv("POSTGRES_SERVER", "db-host")
@@ -72,3 +106,15 @@ class TestSettings:
             data = {}
 
         assert Settings.assemble_db_connection(None, Info()) is None
+
+    def test_logfire_token_from_env(self, monkeypatch):
+        monkeypatch.setenv("PROJECT_NAME", "test")
+        monkeypatch.setenv("POSTGRES_SERVER", "localhost")
+        monkeypatch.setenv("POSTGRES_PASSWORD", "pass")
+        monkeypatch.setenv("POSTGRES_DB", "db")
+        monkeypatch.setenv("LOGFIRE_TOKEN", "test-token")
+
+        from strava.config import Settings
+
+        s = Settings()
+        assert s.LOGFIRE_TOKEN == "test-token"

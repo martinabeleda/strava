@@ -2,6 +2,7 @@ import os
 
 # Set required env vars before importing strava modules (Settings() is called at import time)
 os.environ.setdefault("PROJECT_NAME", "strava-test")
+os.environ.setdefault("LOGFIRE_SEND_TO_LOGFIRE", "false")
 os.environ.setdefault("POSTGRES_SERVER", "localhost")
 os.environ.setdefault("POSTGRES_USER", "postgres")
 os.environ.setdefault("POSTGRES_PASSWORD", "password")

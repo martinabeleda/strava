@@ -1,6 +1,7 @@
 import os
 from logging.config import fileConfig
 
+import logfire
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
@@ -16,7 +17,9 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
+from strava.config import settings  # noqa: E402
 from strava.db.base import Base  # noqa: E402
+from strava.observability import configure_migration_observability  # noqa: E402
 
 target_metadata = Base.metadata
 
@@ -66,6 +69,7 @@ def run_migrations_online():
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+    configure_migration_observability(settings, connectable)
 
     with connectable.connect() as connection:
         context.configure(
@@ -75,7 +79,8 @@ def run_migrations_online():
         )
 
         with context.begin_transaction():
-            context.run_migrations()
+            with logfire.span("alembic run migrations", db_url=configuration["sqlalchemy.url"]):
+                context.run_migrations()
 
 
 if context.is_offline_mode():
