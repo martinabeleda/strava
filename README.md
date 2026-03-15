@@ -47,6 +47,21 @@ make load-test
 
 That opens the Locust UI on `http://localhost:8089` and targets `http://localhost:8080` by default.
 
+To generate report files locally, run:
+
+```shell
+make load-test-report
+```
+
+That writes artifacts to `loadtest/reports/` by default:
+
+- `loadtest/reports/locust.html`
+- `loadtest/reports/locust_stats.csv`
+- `loadtest/reports/locust_failures.csv`
+- `loadtest/reports/locust_exceptions.csv`
+
+You can override the defaults with `LOCUST_USERS`, `LOCUST_SPAWN_RATE`, `LOCUST_RUN_TIME`, `LOCUST_HOST`, `LOAD_TEST_REPORT_DIR`, and `LOAD_TEST_REPORT_PREFIX`.
+
 To run headless against local compose:
 
 ```shell
