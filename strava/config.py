@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
     ENVIRONMENT: str = "development"
     LOGFIRE_SEND_TO_LOGFIRE: bool | Literal["if-token-present"] = "if-token-present"
+    LOGFIRE_TOKEN: str | None = None
 
     POSTGRES_SERVER: str
     POSTGRES_USER: str = "postgres"

@@ -9,8 +9,11 @@ A strava clone service for storing running, hiking and ski routes
 Run the service using docker-compose:
 
 ```shell
+cp .env.example .env
 docker compose up --build
 ```
+
+The dev compose setup reads `LOGFIRE_TOKEN` from `.env` and passes it into the `service` container so Logfire can export telemetry.
 
 ## Local development with uv
 

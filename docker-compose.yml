@@ -48,6 +48,8 @@ services:
       - "--reload"
     environment:
       - PROJECT_NAME=strava
+      - ENVIRONMENT=development
+      - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
       - POSTGRES_SERVER=db:5432
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password

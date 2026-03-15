@@ -10,6 +10,7 @@ def configure_observability(app: FastAPI, settings: Settings, engine: Engine) ->
         service_name=settings.PROJECT_NAME,
         environment=settings.ENVIRONMENT,
         send_to_logfire=settings.LOGFIRE_SEND_TO_LOGFIRE,
+        token=settings.LOGFIRE_TOKEN,
     )
     logfire.instrument_fastapi(app)
     logfire.instrument_sqlalchemy(engine)

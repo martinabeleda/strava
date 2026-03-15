@@ -16,6 +16,7 @@ def test_configure_observability_wires_logfire():
         POSTGRES_PASSWORD="password",
         POSTGRES_DB="test",
         LOGFIRE_SEND_TO_LOGFIRE=False,
+        LOGFIRE_TOKEN="test-token",
     )
 
     with patch("strava.observability.logfire.configure") as configure:
@@ -29,6 +30,7 @@ def test_configure_observability_wires_logfire():
         service_name="strava-test",
         environment="test",
         send_to_logfire=False,
+        token="test-token",
     )
     instrument_fastapi.assert_called_once_with(app)
     instrument_sqlalchemy.assert_called_once_with(engine)
