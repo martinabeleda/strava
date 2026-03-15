@@ -1,4 +1,4 @@
-.PHONY: sync format test itest run build-docker
+.PHONY: sync format test itest run build-docker clean
 
 sync:
 	uv sync --frozen --dev
@@ -7,10 +7,10 @@ format:
 	uv run ruff format .
 	uv run ruff check --fix .
 
-test:
+test: sync format
 	uv run pytest
 
-itest:
+itest: test
 	docker compose -f docker-compose.test.yml up --build --wait
 	uv run pytest tests/acceptance -v; \
 	docker compose -f docker-compose.test.yml down -v
@@ -20,3 +20,7 @@ run:
 
 build-docker:
 	docker build -t martinabeleda/strava .
+
+clean:
+	uv cache clean
+	rm -rf .venv

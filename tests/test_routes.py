@@ -80,6 +80,44 @@ class TestCreateRoute:
         mock_db.refresh.assert_called_once()
 
 
+class TestListRoutesFiltering:
+    def test_filter_by_activity(self, client, mock_db):
+        mock_db.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = []
+        response = client.get(f"{BASE_URL}/?activity=RUNNING")
+        assert response.status_code == 200
+        mock_db.query.return_value.filter.assert_called()
+
+    def test_filter_by_name(self, client, mock_db):
+        mock_db.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = []
+        response = client.get(f"{BASE_URL}/?name=morning")
+        assert response.status_code == 200
+        mock_db.query.return_value.filter.assert_called()
+
+    def test_filter_by_bbox(self, client, mock_db):
+        mock_db.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = []
+        response = client.get(f"{BASE_URL}/?bbox=-1.0,-1.0,2.0,2.0")
+        assert response.status_code == 200
+        mock_db.query.return_value.filter.assert_called()
+
+    def test_invalid_bbox_wrong_count(self, client, mock_db):
+        response = client.get(f"{BASE_URL}/?bbox=1.0,2.0,3.0")
+        assert response.status_code == 422
+
+    def test_invalid_bbox_non_numeric(self, client, mock_db):
+        response = client.get(f"{BASE_URL}/?bbox=a,b,c,d")
+        assert response.status_code == 422
+
+    def test_invalid_activity(self, client, mock_db):
+        response = client.get(f"{BASE_URL}/?activity=SWIMMING")
+        assert response.status_code == 422
+
+    def test_no_filters_no_filter_call(self, client, mock_db):
+        mock_db.query.return_value.offset.return_value.limit.return_value.all.return_value = []
+        response = client.get(f"{BASE_URL}/")
+        assert response.status_code == 200
+        mock_db.query.return_value.filter.assert_not_called()
+
+
 class TestSpatialQuery:
     def test_invalid_geometry(self, client):
         response = client.post(f"{BASE_URL}/intersect", json={"type": "Invalid"})

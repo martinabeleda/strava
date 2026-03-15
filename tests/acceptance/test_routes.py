@@ -104,3 +104,64 @@ class TestSpatialQuery:
         assert response.status_code == 200
         routes = response.json()
         assert len(routes) == 1
+
+
+class TestListRoutesFiltering:
+    def test_filter_by_activity_returns_only_matching(self, base_url):
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_A)  # HIKING
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_B)  # RUNNING
+        response = httpx.get(f"{base_url}{BASE_PATH}/?activity=RUNNING")
+        assert response.status_code == 200
+        routes = response.json()
+        assert len(routes) == 1
+        assert routes[0]["activity"] == "RUNNING"
+
+    def test_filter_by_activity_hiking(self, base_url):
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_A)
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_B)
+        response = httpx.get(f"{base_url}{BASE_PATH}/?activity=HIKING")
+        assert response.status_code == 200
+        routes = response.json()
+        assert len(routes) == 1
+        assert routes[0]["name"] == "Alpine Traverse"
+
+    def test_filter_by_name_partial_match(self, base_url):
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_A)
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_B)
+        response = httpx.get(f"{base_url}{BASE_PATH}/?name=Sprint")
+        assert response.status_code == 200
+        routes = response.json()
+        assert len(routes) == 1
+        assert routes[0]["name"] == "Beach Sprint"
+
+    def test_filter_by_name_case_insensitive(self, base_url):
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_A)
+        response = httpx.get(f"{base_url}{BASE_PATH}/?name=alpine")
+        assert response.status_code == 200
+        routes = response.json()
+        assert len(routes) == 1
+        assert routes[0]["name"] == "Alpine Traverse"
+
+    def test_filter_by_bbox_covers_route_a_only(self, base_url):
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_A)  # coords (0,0)-(1,1)
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_B)  # coords (10,10)-(11,11)
+        response = httpx.get(f"{base_url}{BASE_PATH}/?bbox=-1.0,-1.0,2.0,2.0")
+        assert response.status_code == 200
+        routes = response.json()
+        assert len(routes) == 1
+        assert routes[0]["name"] == "Alpine Traverse"
+
+    def test_combined_activity_and_name_filters(self, base_url):
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_A)
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_B)
+        response = httpx.get(f"{base_url}{BASE_PATH}/?activity=RUNNING&name=Beach")
+        assert response.status_code == 200
+        routes = response.json()
+        assert len(routes) == 1
+        assert routes[0]["name"] == "Beach Sprint"
+
+    def test_no_match_returns_empty(self, base_url):
+        httpx.post(f"{base_url}{BASE_PATH}/", json=ROUTE_A)
+        response = httpx.get(f"{base_url}{BASE_PATH}/?activity=SKIING")
+        assert response.status_code == 200
+        assert response.json() == []
