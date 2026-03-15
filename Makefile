@@ -1,13 +1,14 @@
-.PHONY: sync format test itest run build-docker clean
+.PHONY: venv format test itest run build-docker clean
+.DEFAULT_GOAL := venv
 
-sync:
+venv:
 	uv sync --frozen --dev
 
 format:
 	uv run ruff format .
 	uv run ruff check --fix .
 
-test: sync format
+test: venv format
 	uv run pytest
 
 itest: test
@@ -17,7 +18,7 @@ itest: test
 	docker compose -f docker-compose.test.yml down -v
 
 run:
-	docker compose up
+	docker compose up --build
 
 build-docker:
 	docker build -t martinabeleda/strava .
@@ -25,3 +26,6 @@ build-docker:
 clean:
 	uv cache clean
 	rm -rf .venv
+	docker compose down -v || true
+	docker compose -f docker-compose.test.yml down -v || true
+	docker builder prune -f
