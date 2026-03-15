@@ -29,7 +29,9 @@ def test_configure_logfire_uses_default_service_name():
     settings = build_settings()
     code_source = object()
 
-    with patch("strava.observability.logfire.CodeSource", return_value=code_source) as build_code_source:
+    with patch(
+        "strava.observability.logfire.CodeSource", return_value=code_source
+    ) as build_code_source:
         with patch("strava.observability.logfire.configure") as configure:
             configure_logfire(settings)
 
@@ -59,7 +61,9 @@ def test_configure_observability_wires_logfire():
                 with patch(
                     "strava.observability.logfire.instrument_sqlalchemy"
                 ) as instrument_sqlalchemy:
-                    with patch("strava.observability.logfire.instrument_system_metrics") as instrument_system_metrics:
+                    with patch(
+                        "strava.observability.logfire.instrument_system_metrics"
+                    ) as instrument_system_metrics:
                         configure_observability(app, settings, engine)
 
     configure.assert_called_once_with(
@@ -81,7 +85,9 @@ def test_configure_migration_observability_uses_alembic_service_name():
 
     with patch("strava.observability.logfire.CodeSource", return_value=code_source):
         with patch("strava.observability.logfire.configure") as configure:
-            with patch("strava.observability.logfire.instrument_sqlalchemy") as instrument_sqlalchemy:
+            with patch(
+                "strava.observability.logfire.instrument_sqlalchemy"
+            ) as instrument_sqlalchemy:
                 configure_migration_observability(settings, engine)
 
     configure.assert_called_once_with(
