@@ -37,6 +37,9 @@ dev = [
 requires = ["hatchling>=1.0.0"]
 build-backend = "hatchling.build"
 
+[pytest]
+logfire = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 norecursedirs = ["acceptance", ".venv", ".git", "__pycache__"]
