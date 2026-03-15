@@ -133,7 +133,7 @@ class TestSettings:
         monkeypatch.setenv("POSTGRES_DB", "db")
 
         s = instantiate_settings()
-        assert s.OPENAI_BASE_URL is None
+        assert s.OPENAI_BASE_URL == "https://api.openai.com/v1"
 
     def test_nominatim_search_url_default(self, monkeypatch):
         monkeypatch.setenv("PROJECT_NAME", "test")
