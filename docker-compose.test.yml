@@ -20,6 +20,7 @@ services:
     environment:
       - PROJECT_NAME=strava-test
       - ENVIRONMENT=test
+      - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
       - POSTGRES_SERVER=db:5432
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
@@ -32,6 +33,8 @@ services:
     build: ./
     environment:
       - PROJECT_NAME=strava-test
+      - ENVIRONMENT=test
+      - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
       - POSTGRES_SERVER=db:5432
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
