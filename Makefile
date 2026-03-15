@@ -1,4 +1,4 @@
-.PHONY: venv format check test acceptance-test itest coverage run build-docker clean
+.PHONY: venv format check test acceptance-test itest coverage load-test run build-docker clean
 .DEFAULT_GOAL := venv
 
 venv:
@@ -25,6 +25,9 @@ acceptance-test: check
 	docker compose -f docker-compose.test.yml down -v
 
 itest: acceptance-test
+
+load-test: venv
+	uv run locust -f loadtest/locustfile.py --host $${LOCUST_HOST:-http://localhost:8080}
 
 run:
 	docker compose down -v || true
