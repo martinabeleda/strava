@@ -11,6 +11,7 @@ test: sync format
 	uv run pytest
 
 itest: test
+	docker compose -f docker-compose.test.yml down -v || true
 	docker compose -f docker-compose.test.yml up --build --wait
 	uv run pytest tests/acceptance -v; \
 	docker compose -f docker-compose.test.yml down -v
