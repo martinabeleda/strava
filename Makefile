@@ -1,4 +1,4 @@
-.PHONY: venv format test itest run build-docker clean
+.PHONY: venv format test itest coverage run build-docker clean
 .DEFAULT_GOAL := venv
 
 venv:
@@ -9,12 +9,14 @@ format:
 	uv run ruff check --fix .
 
 test: venv format
-	uv run pytest
+	uv run pytest tests -v --ignore=tests/acceptance --cov=strava --cov-report=term-missing
+
+coverage: test
 
 itest: test
 	docker compose -f docker-compose.test.yml down -v || true
 	docker compose -f docker-compose.test.yml up --build --wait
-	uv run pytest tests/acceptance -v; \
+	uv run pytest tests/acceptance -v --cov=strava --cov-report=term-missing --cov-append; \
 	docker compose -f docker-compose.test.yml down -v
 
 run:
