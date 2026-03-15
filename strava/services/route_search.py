@@ -3,13 +3,12 @@ import json
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Awaitable, Callable
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
 
+import httpx
 from openai import AsyncOpenAI
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.models.test import TestModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from sqlalchemy import func
 from sqlalchemy.orm import Query, Session
@@ -114,11 +113,27 @@ class RouteSearchService:
         settings: Settings,
         *,
         agent: Agent[RouteSearchDeps, RouteSearchInterpretation] | None = None,
+        http_client: httpx.AsyncClient | None = None,
     ) -> None:
         self.settings = settings
         self._agent = agent
+        self._http_client = http_client or httpx.AsyncClient(
+            timeout=httpx.Timeout(settings.NOMINATIM_TIMEOUT_SECONDS),
+            headers={"User-Agent": f"{settings.PROJECT_NAME}/route-search"},
+        )
+        self._geocode_lock = asyncio.Lock()
+        self._geocode_cache: dict[str, BoundingBox | None] = {}
+        self._last_geocode_request_started_at = 0.0
 
     def _build_default_agent(self) -> Agent[RouteSearchDeps, RouteSearchInterpretation]:
+        if self.settings.ROUTE_SEARCH_MOCK_RESPONSE:
+            return build_route_search_agent(
+                TestModel(
+                    call_tools=[],
+                    custom_output_args=json.loads(self.settings.ROUTE_SEARCH_MOCK_RESPONSE),
+                )
+            )
+
         if not self.settings.OPENAI_API_KEY:
             raise RuntimeError("OPENAI_API_KEY must be configured for conversational route search")
 
@@ -133,20 +148,41 @@ class RouteSearchService:
             self._agent = self._build_default_agent()
         return self._agent
 
+    async def aclose(self) -> None:
+        await self._http_client.aclose()
+
     async def geocode_place_to_bbox(self, place_name: str) -> BoundingBox | None:
-        return await asyncio.to_thread(self._geocode_place_to_bbox_sync, place_name)
+        normalized_place_name = place_name.strip()
+        if normalized_place_name in self._geocode_cache:
+            return self._geocode_cache[normalized_place_name]
 
-    def _geocode_place_to_bbox_sync(self, place_name: str) -> BoundingBox | None:
-        query = urlencode({"q": place_name, "format": "jsonv2", "limit": 1})
-        request = Request(
-            f"{self.settings.NOMINATIM_SEARCH_URL}?{query}",
-            headers={"User-Agent": self.settings.PROJECT_NAME},
-        )
+        async with self._geocode_lock:
+            if normalized_place_name in self._geocode_cache:
+                return self._geocode_cache[normalized_place_name]
 
+            await self._wait_for_geocode_budget()
+            bbox = await self._fetch_geocode_bbox(normalized_place_name)
+            self._geocode_cache[normalized_place_name] = bbox
+            return bbox
+
+    async def _wait_for_geocode_budget(self) -> None:
+        # The public Nominatim service allows at most one request per second per application.
+        now = asyncio.get_running_loop().time()
+        elapsed = now - self._last_geocode_request_started_at
+        if elapsed < 1.0:
+            await asyncio.sleep(1.0 - elapsed)
+            now = asyncio.get_running_loop().time()
+        self._last_geocode_request_started_at = now
+
+    async def _fetch_geocode_bbox(self, place_name: str) -> BoundingBox | None:
         try:
-            with urlopen(request, timeout=10) as response:
-                payload = json.loads(response.read().decode("utf-8"))
-        except (HTTPError, URLError, TimeoutError, ValueError, json.JSONDecodeError):
+            response = await self._http_client.get(
+                self.settings.NOMINATIM_SEARCH_URL,
+                params={"q": place_name, "format": "jsonv2", "limit": 1},
+            )
+            response.raise_for_status()
+            payload = response.json()
+        except (httpx.HTTPError, ValueError, json.JSONDecodeError):
             return None
 
         if not payload:
