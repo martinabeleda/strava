@@ -1,21 +1,25 @@
 services:
   db:
     image: postgis/postgis:17-3.5
+    network_mode: host
+    command: ["postgres", "-p", "5432"]
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
     volumes:
       - $HOME/docker/volumes/postgres:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -p 5432"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   migration:
-    build: ./
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    network_mode: host
     command: [alembic, upgrade, head]
     volumes:
       - ./:/app
@@ -24,18 +28,20 @@ services:
       - PROJECT_NAME=strava
       - ENVIRONMENT=development
       - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
-      - POSTGRES_SERVER=db:5432
+      - POSTGRES_SERVER=localhost:5432
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=postgres
-    links:
-      - db
     depends_on:
       db:
         condition: service_healthy
 
   service:
-    build: ./
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    network_mode: host
     command:
       - python
       - "-m"
@@ -51,12 +57,10 @@ services:
       - ENVIRONMENT=development
       - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - POSTGRES_SERVER=db:5432
+      - POSTGRES_SERVER=localhost:5432
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=postgres
-    ports:
-      - 8080:8080
     volumes:
       - ./:/app
     depends_on:
