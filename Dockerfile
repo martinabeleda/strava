@@ -48,6 +48,4 @@ COPY --from=builder /app/alembic /app/alembic
 COPY --from=builder /app/alembic.ini /app/alembic.ini
 COPY README.md /app/README.md
 
-EXPOSE 8080
-
 CMD ["python", "-m", "uvicorn", "strava.main:app", "--host", "0.0.0.0", "--port", "8080"]
